@@ -292,10 +292,6 @@ public class NetworkedClient : MonoBehaviour
 
 
 
-
-
-
-
     IEnumerator LoadGame()
     {
         yield return new WaitForSeconds(2);
