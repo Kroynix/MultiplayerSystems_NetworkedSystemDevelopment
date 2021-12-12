@@ -314,7 +314,7 @@ public class NetworkedServer : MonoBehaviour
                 LinkedList<int> moveList = LoadReplayFile(csv[2]);
                 if(moveList != null)
                 {
-                    StartCoroutine(SendReplayDelay(moveList,id, 1));
+                    StartCoroutine(SendReplayDelay(moveList,id, 0.5f));
                 }
                 else
                 {
@@ -460,7 +460,7 @@ public class NetworkedServer : MonoBehaviour
 
 
 
-    IEnumerator SendReplayDelay(LinkedList<int> moves, int identifier, int time)
+    IEnumerator SendReplayDelay(LinkedList<int> moves, int identifier, float time)
     {
         foreach(int move in moves)
         {
@@ -551,9 +551,9 @@ public static class ClientToServerSignifiers
 public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
-    public const int MatchResponse = 3;
-    public const int ReplayResponse = 4;
-    public const int GameSessionResponse = 5;
+    public const int MatchResponse = 2;
+    public const int ReplayResponse = 3;
+    public const int GameSessionResponse = 4;
 
 }
 

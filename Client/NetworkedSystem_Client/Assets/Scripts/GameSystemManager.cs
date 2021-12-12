@@ -314,9 +314,9 @@ public static class ClientToServerSignifiers
 public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
-    public const int MatchResponse = 3;
-    public const int ReplayResponse = 4;
-    public const int GameSessionResponse = 5;
+    public const int MatchResponse = 2;
+    public const int ReplayResponse = 3;
+    public const int GameSessionResponse = 4;
 
 }
 
