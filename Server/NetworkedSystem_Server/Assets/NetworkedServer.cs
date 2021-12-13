@@ -30,19 +30,18 @@ public class NetworkedServer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
-        Debug.Log("Started Server");
-        // "Kind of a constant"
+        // Player Path Constants
         playerAccountFilePath = Application.dataPath + Path.DirectorySeparatorChar + "UserFiles" + Path.DirectorySeparatorChar + "PlayerAccountData.txt";
         userRecordingFilePath = Application.dataPath + Path.DirectorySeparatorChar + "RecordingFiles" + Path.DirectorySeparatorChar;
 
-
+        // Intialize the Network Transport and setup Configs and Tepology
         NetworkTransport.Init();
         ConnectionConfig config = new ConnectionConfig();
         reliableChannelID = config.AddChannel(QosType.Reliable);
         unreliableChannelID = config.AddChannel(QosType.Unreliable);
         HostTopology topology = new HostTopology(config, maxConnections);
         hostID = NetworkTransport.AddHost(topology, socketPort, null);
+
 
         // List of Player accounts and current connected ID's
         playerAccounts = new LinkedList<PlayerAccount>();
@@ -62,7 +61,6 @@ public class NetworkedServer : MonoBehaviour
     // Update is called once per frame
     void Update() 
     {
-
         int recHostID;
         int recConnectionID;
         int recChannelID;
@@ -103,21 +101,17 @@ public class NetworkedServer : MonoBehaviour
     
     private void ProcessRecievedMsg(string msg, int id)
     {
-        //Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
 
         string[] csv = msg.Split(',');
-
         int signifier = int.Parse(csv[0]);
 
-
-
+        // Handler if Client wants to Create and Account
         if(signifier == ClientToServerSignifiers.CreateAccount)
         {
             string n = csv[1];
             string p = csv[2];
 
             bool isUnique = true;
-
             foreach(PlayerAccount pa in playerAccounts) 
             {
                 if(pa.Name == n)
@@ -127,6 +121,7 @@ public class NetworkedServer : MonoBehaviour
                 }
             }
 
+            // Check if Details are Unique
             if(isUnique) 
             {
                 playerAccounts.AddLast(new PlayerAccount(n,p));
@@ -141,6 +136,7 @@ public class NetworkedServer : MonoBehaviour
             }
         }
 
+        // Handler if Client wants to login
         else if (signifier == ClientToServerSignifiers.Login)
         {
             string n = csv[1];
@@ -149,6 +145,7 @@ public class NetworkedServer : MonoBehaviour
             bool hasBeenFound = false;
             
 
+            // Check for Matching Credentials 
             foreach(PlayerAccount pa in playerAccounts)
             {
                 if(pa.Name == n)
@@ -175,6 +172,7 @@ public class NetworkedServer : MonoBehaviour
 
         }
 
+        // Send Chat messages to All Clients after being sent to the server
         else if (signifier == ChatStates.ClientToServer)
         {
             string name = csv[1];
@@ -189,8 +187,11 @@ public class NetworkedServer : MonoBehaviour
         // Match Signifier Handling
         else if (signifier == ClientToServerSignifiers.Match)
         {
+            // Check Signifier for Matchs
             int MatchSignifier = int.Parse(csv[1]);
 
+            
+            // Handler if there is no current match available
             if (MatchSignifier == GameSignifiers.FindMatch)
             {
                 if(playerWaitingForMatch == -1)
@@ -208,6 +209,7 @@ public class NetworkedServer : MonoBehaviour
                 }
             }
 
+            // Handler to send moves made on a player side to all sides (Observer or Enemy)
             else if (MatchSignifier == GameSignifiers.SendMoveToServer)
             {
                 int move = int.Parse(csv[2]);
@@ -231,6 +233,7 @@ public class NetworkedServer : MonoBehaviour
                 }
             }
 
+            // Handler if any of the Users Win or Tie, the game is Ended for both players and actions are paused until game is Reset
             else if (MatchSignifier == GameSignifiers.EndGame)
             {
                 GameSession gs = FindGameSessionWithPlayerID(id);
@@ -242,6 +245,7 @@ public class NetworkedServer : MonoBehaviour
                 }
             }
 
+            // Handler to Reset the Game (Client and Observers)
             else if (MatchSignifier == GameSignifiers.ResetGame)
             {
                 GameSession gs = FindGameSessionWithPlayerID(id);
@@ -260,6 +264,7 @@ public class NetworkedServer : MonoBehaviour
                 }
             }
 
+            // Handle saving of Files, Allow the user to choose the name of the file and save it on the Server Side
             else if (MatchSignifier == GameSignifiers.SaveReplay)
             {
                 string FileName = csv[2];
@@ -269,6 +274,8 @@ public class NetworkedServer : MonoBehaviour
                 
             }
 
+
+            // If any of the players decide to quit the game all players will be booted back to the Chatroom
             else if (MatchSignifier == GameSignifiers.QuitGame)
             {
 
@@ -287,7 +294,7 @@ public class NetworkedServer : MonoBehaviour
                         SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, observer);
                     }
 
-
+                    // Remove the Gamesession
                     gameSessions.Remove(gs);
                 }
 
@@ -299,18 +306,15 @@ public class NetworkedServer : MonoBehaviour
                     SendMessageToClient(ServerToClientSignifiers.MatchResponse + "," + GameSignifiers.QuitGame, id);
                 }
             }
-
-
-
         }
 
+        // Check if the Signifier If the client is asking to Replay
         else if (signifier == ClientToServerSignifiers.Replay)
         {
             int ReplaySignifier = int.Parse(csv[1]);
 
             if(ReplaySignifier == ReplaySignifiers.RequestingReplay)
             {
-
                 LinkedList<int> moveList = LoadReplayFile(csv[2]);
                 if(moveList != null)
                 {
@@ -333,16 +337,19 @@ public class NetworkedServer : MonoBehaviour
 
         }
 
-        else if (signifier == ClientToServerSignifiers.GameSession)
+        // Handler if Signifier if the Client is looking for a game session
+        else if (signifier == ClientToServerSignifiers.LookingForGameSession)
         {
             int GameSessionSignifier = int.Parse(csv[1]);
 
+            //send them a slist of all the current Game Sessions 
             if(GameSessionSignifier == GameSessionSignifiers.RequestSessionList)
             {
                 foreach(GameSession gs in gameSessions)
                     SendMessageToClient(ServerToClientSignifiers.GameSessionResponse + "," + GameSessionSignifiers.SendingSessionList + "," + gs.playerID1, id);
             }
 
+            // Handler if the User is requesting to join a GameSession as a Observer
             else if (GameSessionSignifier == GameSessionSignifiers.RequestJoin)
             {
                 int SessionID = int.Parse(csv[2]);
@@ -544,7 +551,7 @@ public static class ClientToServerSignifiers
     public const int CreateAccount = 2;
     public const int Match = 3;
     public const int Replay = 4;
-    public const int GameSession = 5;
+    public const int LookingForGameSession = 5;
     
 }
 

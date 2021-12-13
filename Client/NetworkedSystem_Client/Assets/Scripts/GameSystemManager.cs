@@ -247,7 +247,7 @@ public class GameSystemManager : MonoBehaviour
 
     public void ViewInProgressGames()
     {
-        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameSession + "," + GameSessionSignifiers.RequestSessionList);
+        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.LookingForGameSession + "," + GameSessionSignifiers.RequestSessionList);
         FindObjectOfType<GameSessionManager>().ResetGameSessionList();
         ChangeGameState(GameStates.GameSessionViewer);
     }
@@ -307,7 +307,7 @@ public static class ClientToServerSignifiers
     public const int CreateAccount = 2;
     public const int Match = 3;
     public const int Replay = 4;
-    public const int GameSession = 5;
+    public const int LookingForGameSession = 5;
 
 }
 

@@ -16,8 +16,7 @@ public class GameSessionManager : MonoBehaviour
     {
         if(GameSessionSelection.text != "" && Input.GetKeyDown(KeyCode.Return))
         {
-            Debug.Log("Testing");
-            FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameSession + "," + GameSessionSignifiers.RequestJoin + "," 
+            FindObjectOfType<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.LookingForGameSession + "," + GameSessionSignifiers.RequestJoin + "," 
             + GameSessionSelection.text);
             GameSessionSelection.text = "";
 
