@@ -375,9 +375,6 @@ public class NetworkedServer : MonoBehaviour
         }
 
 
-        
-
-
     }
 
     #region PlayerAccountHandling
@@ -395,6 +392,7 @@ public class NetworkedServer : MonoBehaviour
         
     }
 
+    // Load player accounts through the playerAccount path, Checks if it exists beforehand.
     private void LoadPlayerAccounts()
     {
         if(File.Exists(playerAccountFilePath))
@@ -448,6 +446,7 @@ public class NetworkedServer : MonoBehaviour
     }
 
 
+    // Load Load Replay files by returning a LinkedList of all moves
     private LinkedList<int> LoadReplayFile(string fileName)
     {
         LinkedList<int> moveList = new LinkedList<int>();
@@ -466,7 +465,7 @@ public class NetworkedServer : MonoBehaviour
     }
 
 
-
+    // Have the server Send Replay Moves individually.
     IEnumerator SendReplayDelay(LinkedList<int> moves, int identifier, float time)
     {
         foreach(int move in moves)
@@ -480,7 +479,7 @@ public class NetworkedServer : MonoBehaviour
     #endregion ReplayHandling
 
 
-
+    // Find Game Session with PlayerID's 
     private GameSession FindGameSessionWithPlayerID(int id)
     {
         foreach(GameSession gs in gameSessions)
@@ -492,6 +491,7 @@ public class NetworkedServer : MonoBehaviour
     }
 
 
+    // Find Find GameSession via Observers ID
     private GameSession FindObserverWithID(int id)
     {
         foreach(GameSession gs in gameSessions)
