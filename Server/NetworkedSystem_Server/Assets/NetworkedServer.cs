@@ -417,13 +417,14 @@ public class NetworkedServer : MonoBehaviour
     private void LoadAllReplays()
     {
         ReplayFiles.Clear();
-        string [] files = System.IO.Directory.GetFiles(userRecordingFilePath);
+        var files = System.IO.Directory.EnumerateFiles(userRecordingFilePath, "*.txt");
+
         foreach (string file in files)
         {
-            string pos = file.Remove(0,120);
+            string pos = file.Substring(userRecordingFilePath.Length);
+            //string pos = file.Remove(0,120);
             if(!pos.Contains(".meta"))
                 ReplayFiles.AddLast(pos);
-            
             Debug.Log(pos);
             
         }
